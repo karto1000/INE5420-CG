@@ -28,43 +28,73 @@ class Canvas(QtWidgets.QLabel):
         pixmap = QtGui.QPixmap(700, 500)
         pixmap.fill(Qt.white)
         self.setPixmap(pixmap)
+        self.function = 0
+        self.function_map = {
+            0: self.draw_point,
+            1: self.draw_line,
+            2: self.draw_polygon,
+        }
 
-        self.last_x, self.last_y = None, None
+        self.last_point = None
         self.pen_color = QtGui.QColor('#000000')
 
     def set_pen_color(self, c):
         self.pen_color = QtGui.QColor(c)
     
-        # verify if the mouse was pressed
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.drawing = True
-            self.lastPoint = event.pos()
+    def set_funciont(self, f):
+        self.function = f
+        self.last_point = None
 
-            # print the pressed point
-            print(self.lastPoint)
+    def create_object(self, posi):
 
-    def mouseMoveEvent(self, e):
-        if self.last_x is None: # First event.
-            self.last_x = e.x()
-            self.last_y = e.y()
 
+    def draw_point(self, posi):
         painter = QtGui.QPainter(self.pixmap())
         p = painter.pen()
         p.setWidth(4)
         p.setColor(self.pen_color)
         painter.setPen(p)
-        painter.drawLine(self.last_x, self.last_y, e.x(), e.y())
+        painter.drawPoint(posi)
         painter.end()
         self.update()
+        self.create_object()
 
-        # Update the origin for next time.
-        self.last_x = e.x()
-        self.last_y = e.y()
+    def draw_line(self, posi):
+        if not self.last_point:
+            self.last_point = posi
+        else:
+            painter = QtGui.QPainter(self.pixmap())
+            p = painter.pen()
+            p.setWidth(4)
+            p.setColor(self.pen_color)
+            painter.setPen(p)
+            painter.drawLine(self.last_point, posi)
+            painter.end()
+            self.update()
+            self.last_point = None
+        
+    def draw_polygon(self, posi):
+        if not self.last_point:
+            self.last_point = posi
+            self.first_point = posi
+        else:
+            self.draw_line(posi)
+            self.last_point = posi
 
-    def mouseReleaseEvent(self, e):
-        self.last_x = None
-        self.last_y = None
+        # verify if the mouse was pressed
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.drawing = True
+            a = self.function_map.get(self.function, lambda: 'Invalid')
+            a(event.pos())
+            #self.draw_point(event.pos())
+            #self.lastPoint = event.pos()
+
+            # print the pressed point
+            print(self.last_point)
+        else: 
+            if self.function == 3:
+                self.draw_polygon(self.first_point)
     
     # define the save function, to save the draw
     def save(self):
@@ -99,14 +129,14 @@ class MainWindow(QtWidgets.QMainWindow):
         groupBoxMenuFuncoes.setFont(QtGui.QFont("Sanserif", 10))
 
         self.listDrawElements = QtWidgets.QListWidget()
-        self.listDrawElements.setGeometry(10, 30, 171, 101)
+        #sself.listDrawElements.setGeometry(10, 30, 171, 50)
         
-        self.listDrawElements.setGeometry(QtCore.QRect(10, 30, 171, 101))
+        #self.listDrawElements.setGeometry(QtCore.QRect(10, 30, 171, 50))
         itemPonto = QtWidgets.QListWidgetItem("Ponto")
         self.listDrawElements.addItem(itemPonto)
         itemReta = QtWidgets.QListWidgetItem("Reta")
         self.listDrawElements.addItem(itemReta)
-        itemPoligono = QtWidgets.QListWidgetItem("Plígono")
+        itemPoligono = QtWidgets.QListWidgetItem("Polígono")
         self.listDrawElements.addItem(itemPoligono)
 
         self.label = QtWidgets.QLabel()
@@ -133,6 +163,8 @@ class MainWindow(QtWidgets.QMainWindow):
         debugTextBrowser = QtWidgets.QTextBrowser()
         self.canvas = Canvas()
 
+        listObjects = QtWidgets.QListWidget()
+
         w = QtWidgets.QWidget()
         l = QtWidgets.QHBoxLayout()
         w.setLayout(l)
@@ -147,6 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         l.addWidget(groupBoxMenuFuncoes)
         l.addLayout(vertical)
+        l.addWidget(listObjects)
         
         #palette.addWidget(l)
         #l.addLayout(palette)
@@ -211,6 +244,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def listview_clicked(self):
         item = self.listDrawElements.currentRow()
+        self.canvas.set_funciont(item)
+        print(item)
         self.label.setText(str(item))
 
     '''
@@ -227,6 +262,12 @@ class MainWindow(QtWidgets.QMainWindow):
             b = QPaletteButton(c)
             b.pressed.connect(lambda c=c: self.canvas.set_pen_color(c))
             layout.addWidget(b)
+
+    def add_object(self, obj, name):
+        itemPoligono = QtWidgets.QListWidgetItem(name)
+        self.listObjects.addItem(itemPoligono)
+        self.update()
+        
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
