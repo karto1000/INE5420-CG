@@ -45,9 +45,6 @@ class Canvas(QtWidgets.QLabel):
         self.function = f
         self.last_point = None
 
-    def create_object(self, posi):
-
-
     def draw_point(self, posi):
         painter = QtGui.QPainter(self.pixmap())
         p = painter.pen()
@@ -57,7 +54,6 @@ class Canvas(QtWidgets.QLabel):
         painter.drawPoint(posi)
         painter.end()
         self.update()
-        self.create_object()
 
     def draw_line(self, posi):
         if not self.last_point:
@@ -163,8 +159,6 @@ class MainWindow(QtWidgets.QMainWindow):
         debugTextBrowser = QtWidgets.QTextBrowser()
         self.canvas = Canvas()
 
-        listObjects = QtWidgets.QListWidget()
-
         w = QtWidgets.QWidget()
         l = QtWidgets.QHBoxLayout()
         w.setLayout(l)
@@ -179,7 +173,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         l.addWidget(groupBoxMenuFuncoes)
         l.addLayout(vertical)
-        l.addWidget(listObjects)
         
         #palette.addWidget(l)
         #l.addLayout(palette)
@@ -262,11 +255,6 @@ class MainWindow(QtWidgets.QMainWindow):
             b = QPaletteButton(c)
             b.pressed.connect(lambda c=c: self.canvas.set_pen_color(c))
             layout.addWidget(b)
-
-    def add_object(self, obj, name):
-        itemPoligono = QtWidgets.QListWidgetItem(name)
-        self.listObjects.addItem(itemPoligono)
-        self.update()
         
 
 def main():
