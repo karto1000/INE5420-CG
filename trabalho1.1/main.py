@@ -165,8 +165,6 @@ class MainWindow(QtWidgets.QMainWindow):
         debugTextBrowser = QtWidgets.QTextBrowser()
         self.canvas = Canvas()
 
-        listObjects = QtWidgets.QListWidget()
-
         w = QtWidgets.QWidget()
         l = QtWidgets.QHBoxLayout()
         w.setLayout(l)
@@ -181,7 +179,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         l.addWidget(groupBoxMenuFuncoes)
         l.addLayout(vertical)
-        l.addWidget(listObjects)
         
         #palette.addWidget(l)
         #l.addLayout(palette)
