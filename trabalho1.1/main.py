@@ -9,6 +9,7 @@ Curso: INE5420 - Computacao Grafica
 """
 
 import sys
+#from Drawings  TODO
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QFrame, QSplitter, QApplication)
@@ -45,8 +46,8 @@ class Canvas(QtWidgets.QLabel):
         self.function = f
         self.last_point = None
 
-    def create_object(self, posi):
-
+    def create_object(self, posi, name):
+        self.parentWidget().add_object(posi, name)
 
     def draw_point(self, posi):
         painter = QtGui.QPainter(self.pixmap())
@@ -57,7 +58,7 @@ class Canvas(QtWidgets.QLabel):
         painter.drawPoint(posi)
         painter.end()
         self.update()
-        self.create_object()
+        #self.create_object(posi, "point") TODO#
 
     def draw_line(self, posi):
         if not self.last_point:
@@ -93,7 +94,7 @@ class Canvas(QtWidgets.QLabel):
             # print the pressed point
             print(self.last_point)
         else: 
-            if self.function == 3:
+            if self.function == 2:          # to close the polygon
                 self.draw_polygon(self.first_point)
     
     # define the save function, to save the draw
@@ -121,6 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.objects = []       # list of tuples
 
         self.InitUI()
 
@@ -264,6 +266,8 @@ class MainWindow(QtWidgets.QMainWindow):
             layout.addWidget(b)
 
     def add_object(self, obj, name):
+        name = name + str(self.listObjects.count())
+        self.objects.append([name, [posi]])
         itemPoligono = QtWidgets.QListWidgetItem(name)
         self.listObjects.addItem(itemPoligono)
         self.update()
