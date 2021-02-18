@@ -38,6 +38,7 @@ class Canvas(QtWidgets.QLabel):
 
         self.last_point = None
         self.pen_color = QtGui.QColor('#000000')
+        self.scale = 1
 
     def set_pen_color(self, c):
         self.pen_color = QtGui.QColor(c)
@@ -105,9 +106,25 @@ class Canvas(QtWidgets.QLabel):
         self.pixmap.save(filePath)
     
     def clear(self):
-        pixmap = QtGui.QPixmap(700, 500)
-        pixmap.fill(Qt.white)
-        self.setPixmap(pixmap)
+        self.pixmap().fill(Qt.white)
+        self.setPixmap(self.pixmap())
+    
+    def on_zoom_in(self, event):
+        self.scale *=1.5
+        self.resize_image()
+
+    def on_zoom_out(self, event):
+        self.scale /= 1.5
+        self.resize_image()
+    
+    def resize_image(self):
+        size = self.pixmap().size()
+
+        scaled_pixmap = self.pixmap().scaled(self.scale * size, Qt.KeepAspectRatioByExpanding)
+        #scaled_pixmap = self.pixmap().scaled(self.scale * size, Qt.KeepAspectRatio)
+        #scaled_pixmap = self.pixmap().scaled(self.scale * size, Qt.IgnoreAspectRatio)
+
+        self.setPixmap(scaled_pixmap)
 
 
 class QPaletteButton(QtWidgets.QPushButton):
@@ -155,10 +172,12 @@ class MainWindow(QtWidgets.QMainWindow):
         groupBoxMenuFuncoes.setLayout(vBoxMenuFuncoes)
 
         vBoxWindow = QtWidgets.QHBoxLayout()
-        plusButton = QtWidgets.QPushButton("+")
-        minusButton = QtWidgets.QPushButton("-")
-        vBoxWindow.addWidget(plusButton)
-        vBoxWindow.addWidget(minusButton)
+        zoomInButton = QtWidgets.QPushButton("+")
+       
+
+        zoomOutButton = QtWidgets.QPushButton("-")
+        vBoxWindow.addWidget(zoomInButton)
+        vBoxWindow.addWidget(zoomOutButton)
 
         groupBoxWindow.setLayout(vBoxWindow)
 
@@ -168,17 +187,24 @@ class MainWindow(QtWidgets.QMainWindow):
         w = QtWidgets.QWidget()
         l = QtWidgets.QHBoxLayout()
         w.setLayout(l)
+        # dá zoom in na tela
+        zoomInButton.clicked.connect(self.canvas.on_zoom_in)
+        # dá zoom out na tela
+        zoomOutButton.clicked.connect(self.canvas.on_zoom_out)
+        
 
         palette = QtWidgets.QHBoxLayout()
         self.add_palette_buttons(palette)
 
         vertical = QtWidgets.QVBoxLayout()
+        
         vertical.addWidget(self.canvas)
         vertical.addWidget(debugTextBrowser)
         vertical.addLayout(palette)
 
         l.addWidget(groupBoxMenuFuncoes)
         l.addLayout(vertical)
+        w.setFixedSize(800,600)
         
         #palette.addWidget(l)
         #l.addLayout(palette)
@@ -190,8 +216,6 @@ class MainWindow(QtWidgets.QMainWindow):
         fileMenu = mainMenu.addMenu('File')
         # define a menu called 'Brush Size'
         brushMenu = mainMenu.addMenu('Brush Size')
-        # define a menu called 'Brush Color'
-        brushColor = mainMenu.addMenu('Brush Color')
 
         # create a action called 'Save' and set an icon to it
         saveAction = QtWidgets.QAction(QtGui.QIcon('icons/save.png'), 'Save', self)
@@ -220,23 +244,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ninepxAction = QtWidgets.QAction(QtGui.QIcon('icons/ninepx.png'), '9px', self)
         ninepxAction.setShortcut('Ctrl+9')
-        brushMenu.addAction(ninepxAction)
-
-        redAction = QtWidgets.QAction(QtGui.QIcon('icons/red.png'), 'Red', self)
-        redAction.setShortcut('Ctrl+r')
-        brushColor.addAction(redAction)
-
-        greenAction = QtWidgets.QAction(QtGui.QIcon('icons/green.png'), 'Green', self)
-        greenAction.setShortcut('Ctrl+g')
-        brushColor.addAction(greenAction)
-
-        blackAction = QtWidgets.QAction(QtGui.QIcon('icons/black.png'), 'Black', self)
-        blackAction.setShortcut('Ctrl+b')
-        brushColor.addAction(blackAction)
-
-        yellowAction = QtWidgets.QAction(QtGui.QIcon('icons/yellow.png'), 'Yellow', self)
-        yellowAction.setShortcut('Ctrl+y')
-        brushColor.addAction(yellowAction)
+        brushMenu.addAction(ninepxAction) 
 
         self.setCentralWidget(w)
         self.show()
