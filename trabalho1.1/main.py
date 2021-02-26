@@ -53,7 +53,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.objects = []       # list of tuples
-
+        self.names = dict.fromkeys([0,1, 2], ('Remove','Add')) ## Dict for the names of the buttons
+        self.names.update({3:('Left', 'Right')})
+        self.names.update({4:('Decrease', 'Increase')}) 
         self.InitUI()
 
     def InitUI(self):    
@@ -77,34 +79,17 @@ class MainWindow(QtWidgets.QMainWindow):
         ### List of functions ###
 
         ### Objects ###
-        
         self.listObjects = QtWidgets.QListWidget()
         self.labelObjects = QLabel("Objects")
         ### Objects ###
-        
-        ### Left Box ###
-        vBoxMenuFuncoes = QtWidgets.QVBoxLayout()
-
-        vBoxMenuFuncoes.addWidget(self.listDrawElements)
-        vBoxMenuFuncoes.addWidget(self.labelObjects)
-        vBoxMenuFuncoes.addWidget(self.listObjects)
-        groupBoxWindow = QtWidgets.QGroupBox("Window")
-        vBoxMenuFuncoes.addWidget(groupBoxWindow)
-        self.label = QtWidgets.QLabel()
-        vBoxMenuFuncoes.addWidget(self.label)
-        groupBoxMenuFuncoes.setLayout(vBoxMenuFuncoes)
-        ### Left Box ###
-
-        
 
         ### Transformations ###
         vBoxWindow = QtWidgets.QHBoxLayout()
 
-        plus = QtWidgets.QPushButton("+")
-        minus = QtWidgets.QPushButton("-")
-        vBoxWindow.addWidget(plus)
-        vBoxWindow.addWidget(minus)
-        groupBoxWindow.setLayout(vBoxWindow)
+        self.minus = QtWidgets.QPushButton("-")
+        self.plus = QtWidgets.QPushButton("+")
+        vBoxWindow.addWidget(self.minus)
+        vBoxWindow.addWidget(self.plus)
         ### Transformations ###
 
         ### Interactions ###
@@ -120,8 +105,21 @@ class MainWindow(QtWidgets.QMainWindow):
         
         palette = QtWidgets.QHBoxLayout()
         self.add_palette_buttons(palette)
-
         ### Interactions ###
+
+        ### Left Box ###
+        vBoxMenuFuncoes = QtWidgets.QVBoxLayout()
+
+        vBoxMenuFuncoes.addWidget(self.listDrawElements)
+        vBoxMenuFuncoes.addWidget(self.labelObjects)
+        vBoxMenuFuncoes.addWidget(self.listObjects)
+        self.groupBoxWindow = QtWidgets.QGroupBox("Window")
+        vBoxMenuFuncoes.addWidget(self.groupBoxWindow)
+        self.groupBoxWindow.setLayout(vBoxWindow)
+        self.label = QtWidgets.QLabel()
+        vBoxMenuFuncoes.addWidget(self.label)
+        groupBoxMenuFuncoes.setLayout(vBoxMenuFuncoes)
+        ### Left Box ###
 
         ### Left Part ###
         vertical = QtWidgets.QVBoxLayout()
@@ -139,10 +137,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
     def listview_clicked(self):
+        text = self.listDrawElements.selectedItems()[0].text()
+        self.groupBoxWindow.setTitle(text)
+        
         item = self.listDrawElements.currentRow()
+        l, r = self.names[item]
+        print((l,r))
+        self.minus.setText(l)
+        self.plus.setText(r)
 
-        self.canvas.set_funciont(item)
-        print(item)
+        # self.canvas.set_funciont(item)
+        # print(item)
         self.label.setText(str(item))
 
     def add_palette_buttons(self, layout):
